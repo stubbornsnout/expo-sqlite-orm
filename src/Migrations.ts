@@ -35,6 +35,7 @@ export class Migrations {
     this.database = Database.instance(databaseName)
     this.statements = statements
     this.repository = new Repository(databaseName, TABLE_NAME, columnMapping)
+    console.log(`Created new repository ${TABLE_NAME}`)
   }
 
   async migrate() {
@@ -54,7 +55,8 @@ export class Migrations {
 
   private async setupMigrationsTable() {
     const sql = `CREATE TABLE IF NOT EXISTS ${TABLE_NAME} (name TEXT NOT NULL)`
-    await this.repository.databaseLayer.executeSql(sql).then(() => true)
+
+    return await this.repository.databaseLayer.executeSql(sql)
   }
 
   private async getExecutedMigrationNames(): Promise<TStatementName[]> {

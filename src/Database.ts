@@ -1,5 +1,5 @@
-import * as SQLite from 'expo-sqlite/legacy'
-import { SQLTransactionCallback, SQLTransactionErrorCallback, SQLiteDatabase } from 'expo-sqlite/legacy'
+import * as SQLite from 'expo-sqlite'
+import { SQLiteDatabase } from 'expo-sqlite'
 
 export class Database {
   private databaseName: string
@@ -10,9 +10,9 @@ export class Database {
     this.databaseName = databaseName
   }
 
-  private openDatabase() {
+  private async openDatabase() {
     if (!this.database) {
-      this.database = SQLite.openDatabase(this.databaseName)
+      this.database = await SQLite.openDatabaseAsync(this.databaseName)
     }
   }
 
@@ -24,13 +24,9 @@ export class Database {
     return this.instances[databaseName]
   }
 
-  transaction(
-    callback: SQLTransactionCallback,
-    errorCallback?: SQLTransactionErrorCallback,
-    successCallback?: () => void
-  ) {
-    this.openDatabase()
-    return this.database.transaction(callback, errorCallback, successCallback)
+  async sqlDatabase() {
+    await this.openDatabase()
+    return this.database
   }
 
   async close(): Promise<void> {
@@ -42,7 +38,7 @@ export class Database {
   async reset(): Promise<void> {
     this.openDatabase()
     await this.database.closeAsync()
-    await this.database.deleteAsync()
+    await SQLite.deleteDatabaseAsync(this.databaseName)
     this.database = undefined
   }
 }

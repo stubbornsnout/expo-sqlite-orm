@@ -1,3 +1,4 @@
+import { SQLiteBindParams } from 'expo-sqlite'
 import { Database } from './Database'
 import QueryBuilder from './query_builder'
 import { IQueryOptions } from './types'
@@ -11,29 +12,29 @@ export class DatabaseLayer<T = any> {
     this.tableName = tableName
   }
 
-  async executeBulkSql(sqls: string[], params: any[] = []) {
-    const database = this.database
+  async executeBulkSql(sqls: string[], params: SQLiteBindParams = []) {
+    const database = await this.database.sqlDatabase()
     return new Promise((txResolve, txReject) => {
-      database.transaction(tx => {
         Promise.all(sqls.map((sql, index) => {
           return new Promise((sqlResolve, sqlReject) => {
-            tx.executeSql(
-              sql,
-              params[index],
-              (_, { rows, insertId }) => {
-                sqlResolve({ rows: rows._array, insertId })
-              },
-              // @ts-ignore
-              (_, error) => { sqlReject(error) }
-            )
+            database.withTransactionAsync(async () => {
+              const statement = await database.prepareAsync(sql)
+              try {
+                const results = await statement.executeAsync(params)
+                sqlResolve({ rows: results.changes, insertId: results.lastInsertRowId})
+              } catch (e) {
+                sqlReject(e)
+              } finally {
+                await statement.finalizeAsync();
+              }
+            })
           })
         })).then(txResolve).catch(txReject)
-      })
     })
   }
 
   async executeSql(sql: string, params: any[] = []) {
-    return this.executeBulkSql([sql], [params])
+    return this.executeBulkSql([sql], params)
       .then(res => res[0])
       .catch(error => { throw error })
   }
