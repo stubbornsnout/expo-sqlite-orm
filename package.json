@@ -3,6 +3,7 @@
   "version": "2.1.0",
   "description": "Simple orm for expo",
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "author": "Daniel Fernando Lourusso <dflourusso@gmail.com>",
   "license": "MIT",
   "repository": "https://github.com/dflourusso/expo-sqlite-orm",
@@ -14,11 +15,10 @@
   ],
   "scripts": {
     "test": "jest",
-    "build": "tsc"
+    "build": "tsc -p tsconfig.json",
+    "prepare": "npm run build"
   },
-  "files": [
-    "lib/"
-  ],
+  "files": ["lib", "README.md", "LICENSE"],
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@typescript-eslint/eslint-plugin": "^5.33.1",
