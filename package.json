@@ -32,6 +32,6 @@
     "typescript": "^5.4.5"
   },
   "peerDependencies": {
-    "expo-sqlite": "^14.0.3"
+    "expo-sqlite": "^15.1.4"
   }
 }
